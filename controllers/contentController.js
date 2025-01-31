@@ -159,4 +159,72 @@ exports.getAllSubjects = async (req, res) => {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
+};
+
+// Get Subject Content
+exports.getSubjectContent = async (req, res) => {
+  try {
+    const { subjectId } = req.params;
+
+    const subject = await Subject.findById(subjectId)
+      .populate({
+        path: 'chapters',
+        select: 'name description createdAt',
+        options: { sort: { createdAt: 1 } },
+        populate: {
+          path: 'contents',
+          select: 'title description videoUrl duration createdAt',
+          options: { sort: { createdAt: 1 } }
+        }
+      })
+      .select('name description createdAt');
+
+    if (!subject) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Subject not found' 
+      });
+    }
+
+    // Transform the data into a more organized structure
+    const response = {
+      success: true,
+      subject: {
+        id: subject._id,
+        name: subject.name,
+        description: subject.description,
+        chaptersCount: subject.chapters.length,
+        totalVideos: subject.chapters.reduce((sum, chapter) => sum + chapter.contents.length, 0),
+        chapters: subject.chapters.map(chapter => ({
+          id: chapter._id,
+          name: chapter.name,
+          description: chapter.description,
+          videosCount: chapter.contents.length,
+          videos: chapter.contents.map(content => ({
+            id: content._id,
+            title: content.title,
+            description: content.description,
+            videoUrl: content.videoUrl,
+            duration: content.duration,
+            uploadDate: content.createdAt
+          }))
+        }))
+      }
+    };
+
+    res.json(response);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid subject ID format' 
+      });
+    }
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server Error',
+      error: err.message 
+    });
+  }
 }; 

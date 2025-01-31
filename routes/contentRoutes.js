@@ -19,6 +19,9 @@ router.get('/structure', authenticateUser, contentController.getContentStructure
 router.get('/chapters', authenticateUser, contentController.getAllChapters);
 router.get('/subjects', authenticateUser, contentController.getAllSubjects);
 
+// Get specific subject content
+router.get('/subject/:subjectId', authenticateUser, contentController.getSubjectContent);
+
 // Test route for blob storage
 router.post('/test-upload', authenticateAdmin, upload.single('video'), async (req, res) => {
   try {

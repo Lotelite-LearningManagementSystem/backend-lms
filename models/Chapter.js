@@ -22,6 +22,16 @@ const chapterSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for contents
+chapterSchema.virtual('contents', {
+  ref: 'Content',
+  localField: '_id',
+  foreignField: 'chapter'
 });
 
 module.exports = mongoose.model('Chapter', chapterSchema); 

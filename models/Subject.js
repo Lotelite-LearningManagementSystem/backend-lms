@@ -17,6 +17,16 @@ const subjectSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for chapters
+subjectSchema.virtual('chapters', {
+  ref: 'Chapter',
+  localField: '_id',
+  foreignField: 'subject'
 });
 
 module.exports = mongoose.model('Subject', subjectSchema); 

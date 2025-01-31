@@ -1,0 +1,27 @@
+const mongoose = require('mongoose');
+
+const chapterSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  subject: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Subject',
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+module.exports = mongoose.model('Chapter', chapterSchema); 

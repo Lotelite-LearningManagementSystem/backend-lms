@@ -108,4 +108,37 @@ exports.getContentStructure = async (req, res) => {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
+};
+
+// Get All Chapters
+exports.getAllChapters = async (req, res) => {
+  try {
+    const chapters = await Chapter.find()
+      .populate('subject', 'name')
+      .populate('contents', 'title description videoUrl duration')
+      .select('name description createdAt');
+      
+    res.json(chapters);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// Get All Subjects
+exports.getAllSubjects = async (req, res) => {
+  try {
+    const subjects = await Subject.find()
+      .select('name description createdAt')
+      .populate({
+        path: 'chapters',
+        select: 'name description',
+        options: { sort: { createdAt: -1 } }
+      });
+    
+    res.json(subjects);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
 }; 

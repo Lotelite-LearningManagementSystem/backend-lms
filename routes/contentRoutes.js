@@ -16,5 +16,7 @@ router.post(
 
 // User routes
 router.get('/structure', authenticateUser, contentController.getContentStructure);
+router.get('/chapters', authenticateUser, contentController.getAllChapters);
+router.get('/subjects', authenticateUser, contentController.getAllSubjects);
 
 module.exports = router; 

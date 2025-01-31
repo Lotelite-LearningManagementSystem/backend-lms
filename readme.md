@@ -232,3 +232,25 @@
 ]
 ```
 
+### 3. Get Chapters
+**Endpoint:** `GET /api/content/chapters`
+
+**Headers:**
+- `x-auth-token: <user_jwt_token>`
+
+**Response:**
+```json
+<response_data_for_chapters>
+```
+
+### 4. Get Subjects
+**Endpoint:** `GET /api/content/subjects`
+
+**Headers:**
+- `x-auth-token: <user_jwt_token>`
+
+**Response:**
+```json
+<response_data_for_subjects>
+```
+

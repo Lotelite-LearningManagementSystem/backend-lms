@@ -1,6 +1,7 @@
 const Subject = require('../models/Subject');
 const Chapter = require('../models/Chapter');
 const Content = require('../models/Content');
+const { put } = require('@vercel/blob');
 
 // Create Subject
 exports.createSubject = async (req, res) => {
@@ -58,8 +59,18 @@ exports.createChapter = async (req, res) => {
 // Upload Content
 exports.uploadContent = async (req, res) => {
   try {
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+    
+    if (!req.file) {
+      return res.status(400).json({ 
+        message: 'No file uploaded',
+        body: req.body,
+        files: req.files
+      });
+    }
+
     const { title, description, chapterId } = req.body;
-    const videoUrl = `/uploads/${req.file.filename}`;
 
     // First verify that the chapter exists
     const chapter = await Chapter.findById(chapterId);
@@ -67,27 +78,34 @@ exports.uploadContent = async (req, res) => {
       return res.status(404).json({ message: 'Chapter not found' });
     }
 
+    // Upload to Vercel Blob with unique filename
+    const uniqueFilename = `${Date.now()}-${req.file.originalname}`;
+    const blob = await put(uniqueFilename, req.file.buffer, {
+      access: 'public',
+      contentType: req.file.mimetype,
+      addRandomSuffix: false // Prevent random suffix addition
+    });
+
     const content = new Content({
       title,
       description,
       chapter: chapterId,
-      videoUrl,
+      videoUrl: blob.url,
       createdBy: req.admin.id,
     });
 
     await content.save();
-
-    // Populate the content with its chapter details before sending response
     const populatedContent = await Content.findById(content._id)
       .populate('chapter', 'name');
 
     res.json(populatedContent);
   } catch (err) {
-    console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(400).json({ message: 'Invalid chapter ID' });
-    }
-    res.status(500).send('Server Error');
+    console.error('Upload error:', err);
+    res.status(500).json({
+      message: 'Server Error',
+      error: err.message,
+      stack: err.stack
+    });
   }
 };
 
